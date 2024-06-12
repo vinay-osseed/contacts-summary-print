@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<menu>
+  <navItem parent_id="CiviContribute">
+    <attributes>
+      <label>Print Contacts Summary</label>
+      <name>print_contacts_summary</name>
+      <url>civicrm/contact/task/printsummary</url>
+      <permission>access CiviCRM</permission>
+      <operator>OR</operator>
+      <separator>0</separator>
+      <parent_id>Contact</parent_id>
+    </attributes>
+  </navItem>
+</menu>
