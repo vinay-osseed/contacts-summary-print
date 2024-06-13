@@ -1,7 +1,20 @@
 <?php
 
-use CRM_ContactsSummaryPrint_ExtensionUtil as E;
+/**
+ * @file
+ * Print summary class.
+ */
 
+// phpcs:disable
+use CRM_ContactsSummaryPrint_ExtensionUtil as E;
+// phpcs:enable
+
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
+
+/**
+ * Print summary class.
+ */
 class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_Task {
   public $pdf_name = "Contact-Summary-List";
   public $html;
@@ -26,7 +39,8 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     foreach ($this->_contactIds as $contactId) {
       try {
         $contacts[] = civicrm_api3('Contact', 'getsingle', ['id' => $contactId]);
-      } catch (CiviCRM_API3_Exception $e) {
+      }
+      catch (CiviCRM_API3_Exception $e) {
         CRM_Core_Error::debug_log_message('API Error: ' . $e->getMessage());
       }
     }
@@ -42,12 +56,12 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
       'messageTemplateID' => (int) $msg_tpl['id'],
       'tplParams' => [
         'contacts' => $this->all_contacts,
-        'style' => 'page-break-before: auto'
+        'style' => 'page-break-before: auto',
       ],
       'tokenContext' => ['smarty' => TRUE],
       'PDFFilename' => $this->pdf_name,
     ];
-    list($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplate::sendTemplate($send_tpl_params);
+    [$sent, $subject, $message, $html] = CRM_Core_BAO_MessageTemplate::sendTemplate($send_tpl_params);
     $this->assign('templateContent', $html);
     $this->html = $html;
   }
@@ -74,9 +88,11 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
       case '_qf_PrintSummary_next':
         $this->downloadDOCX();
         break;
+
       case '_qf_PrintSummary_done':
         $this->downloadPDF();
         break;
+
       default:
         $this->handleInvalidAction();
         break;
@@ -97,12 +113,13 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
    */
   private function downloadDOCX() {
     $file_name = $this->pdf_name . ".docx";
-    $phpWord = new \PhpOffice\PhpWord\PhpWord();
+    $phpWord = new PhpWord();
     $section = $phpWord->addSection();
 
     if (!empty($this->all_contacts)) {
       $this->addContactsToDOCX($section);
-    } else {
+    }
+    else {
       $section->addText("No contacts found.");
     }
 
@@ -142,7 +159,8 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
   private function addContactDetailsToCell($cell, $contact) {
     if ($contact['contact_type'] == 'Organization') {
       $cell->addText("Organization Name: " . ($contact['organization_name'] ?? 'N/A'));
-    } elseif ($contact['contact_type'] == 'Individual') {
+    }
+    elseif ($contact['contact_type'] == 'Individual') {
       $name = ($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? '');
       $cell->addText("Name: " . trim($name));
     }
@@ -160,11 +178,12 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
    * @param \PhpOffice\PhpWord\PhpWord $phpWord
    * @param string $format
    * @param string $file_name
+   *
    * @return string Path to the temporary file
    */
   private function saveTempFile($phpWord, $format, $file_name) {
     $tempFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $file_name;
-    $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, $format);
+    $objWriter = IOFactory::createWriter($phpWord, $format);
     $objWriter->save($tempFile);
     return $tempFile;
   }
@@ -205,7 +224,8 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
   private function redirectAttachment($attachment) {
     if (!empty($attachment['id'])) {
       CRM_Utils_System::redirect($attachment['values'][0]['url']);
-    } else {
+    }
+    else {
       CRM_Core_Session::setStatus(E::ts('Failed to create attachment'), E::ts('Error'), 'error');
       $this->controller->setDestination(NULL);
       $this->controller->resetPage($this->getName());
@@ -218,15 +238,15 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
   private function downloadPDF() {
     $file_name = $this->pdf_name . ".pdf";
 
-    // Define the custom margins in CSS
+    // Define the custom margins in CSS.
     $html_with_margins = '<style>
       @page {
         margin: 1cm 2cm;
       }
     </style>' . $this->html;
 
-    // Generate the PDF content with the specified margins
-    $pdf_contents = CRM_Utils_PDF_Utils::html2pdf($html_with_margins, $file_name, true);
+    // Generate the PDF content with the specified margins.
+    $pdf_contents = CRM_Utils_PDF_Utils::html2pdf($html_with_margins, $file_name, TRUE);
     $tempFile = $this->saveTempPDF($file_name, $pdf_contents);
     $this->attachAndRedirect($tempFile, $file_name, 'application/pdf');
   }
@@ -236,6 +256,7 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
    *
    * @param string $file_name
    * @param string $pdf_contents
+   *
    * @return string Path to the temporary PDF file
    */
   private function saveTempPDF($file_name, $pdf_contents) {
@@ -243,4 +264,5 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     file_put_contents($tempFile, $pdf_contents);
     return $tempFile;
   }
+
 }
