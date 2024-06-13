@@ -91,8 +91,6 @@ function contacts_summary_print_add_message_template() {
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_uninstall
  */
 function contacts_summary_print_civicrm_uninstall(): void {
-  _contacts_summary_print_civix_civicrm_uninstall();
-
   // Remove the message template
   try {
     // Fetch the message template by title
