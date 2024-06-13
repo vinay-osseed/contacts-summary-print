@@ -1,54 +1,37 @@
-# contacts-summary-print
+# Contacts Summary Print Extension
 
-![Screenshot](/images/screenshot.png)
-
-(*FIXME: In one or two paragraphs, describe what the extension does and why one would download it. *)
+![Screenshot](images/screenshot.png)
 
 The extension is licensed under [AGPL-3.0](LICENSE.txt).
 
 ## Requirements
 
-* PHP v7.4+
-* CiviCRM (*FIXME: Version number*)
+- **PHP:** v7.4+
+- **CiviCRM:** v5.71+
 
-## Installation (Web UI)
+## Installation
 
-Learn more about installing CiviCRM extensions in the [CiviCRM Sysadmin Guide](https://docs.civicrm.org/sysadmin/en/latest/customize/extensions/).
+> Checkout [Instructions](instructions.pdf) PDF file, to know more.
 
-## Installation (CLI, Zip)
+### Web UI
 
-Sysadmins and developers may download the `.zip` file for this extension and
-install it with the command-line tool [cv](https://github.com/civicrm/cv).
+To install the extension using the web UI, follow the steps outlined in the [CiviCRM Sysadmin Guide](https://docs.civicrm.org/sysadmin/en/latest/customize/extensions/).
 
-```bash
-cd <extension-dir>
-cv dl contacts-summary-print@https://github.com/FIXME/contacts-summary-print/archive/master.zip
-```
-or
-```bash
-cd <extension-dir>
-cv dl contacts-summary-print@https://lab.civicrm.org/extensions/contacts-summary-print/-/archive/main/contacts-summary-print-main.zip
-```
+### CLI (Command Line Interface) / Zip
 
-## Installation (CLI, Git)
-
-Sysadmins and developers may clone the [Git](https://en.wikipedia.org/wiki/Git) repo for this extension and
-install it with the command-line tool [cv](https://github.com/civicrm/cv).
+Sysadmins and developers can manually extract the `contacts-summary-print.zip` file into the CiviCRM extension directory. After extraction, use the [cv tool](https://github.com/civicrm/cv) to enable the extension:
 
 ```bash
-git clone https://github.com/FIXME/contacts-summary-print.git
 cv en contacts_summary_print
 ```
-or
-```bash
-git clone https://lab.civicrm.org/extensions/contacts-summary-print.git
-cv en contacts_summary_print
-```
+
+Alternatively, you can install it via the `CiviCRM Extensions` page [here](/civicrm/admin/extensions).
 
 ## Getting Started
 
-(* FIXME: Where would a new user navigate to get started? What changes would they see? *)
+1. **Installation:** Follow the installation instructions above to install the extension.
+2. **Configuration:** After installation, configure the extension as needed through the CiviCRM UI.
 
 ## Known Issues
 
-(* FIXME *)
+- **DOCX Editing Limitation:** Currently, the content of `DOCX` files cannot be updated by editing the `Contacts Summary Print` custom message template, unlike PDF files.
