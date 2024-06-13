@@ -7,6 +7,9 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
   public $html;
   public $all_contacts;
 
+  /**
+   * Pre-process the form, setting up title, fetching contacts data, and generating PDF.
+   */
   public function preProcess() {
     $this->setTitle('Print Contacts Summary');
     parent::preProcess();
@@ -15,6 +18,9 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $this->generatePDF();
   }
 
+  /**
+   * Fetch contacts data based on provided contact IDs.
+   */
   private function fetchContactsData() {
     $contacts = [];
     foreach ($this->_contactIds as $contactId) {
@@ -27,10 +33,13 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $this->all_contacts = $contacts;
   }
 
+  /**
+   * Generate the PDF content using a message template.
+   */
   private function generatePDF() {
     $msg_tpl = civicrm_api3('MessageTemplate', 'getsingle', ['msg_title' => TPL_TITLE]);
     $send_tpl_params = [
-      'messageTemplateID' => (int)$msg_tpl['id'],
+      'messageTemplateID' => (int) $msg_tpl['id'],
       'tplParams' => ['contacts' => $this->all_contacts],
       'tokenContext' => ['smarty' => TRUE],
       'PDFFilename' => $this->pdf_name,
@@ -40,6 +49,9 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $this->html = $html;
   }
 
+  /**
+   * Build the quick form with buttons for different actions.
+   */
   public function buildQuickForm() {
     parent::buildQuickForm();
     $this->addDefaultButtons(E::ts('Print Contacts Summary'));
@@ -50,6 +62,9 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     ]);
   }
 
+  /**
+   * Process the form actions based on the button clicked.
+   */
   public function postProcess() {
     $action = $this->controller->getButtonName();
     switch ($action) {
@@ -65,12 +80,18 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     }
   }
 
+  /**
+   * Handle invalid form actions.
+   */
   private function handleInvalidAction() {
     CRM_Core_Session::setStatus(E::ts('Invalid action'), E::ts('Error'), 'error');
     $this->controller->setDestination(NULL);
     $this->controller->resetPage($this->getName());
   }
 
+  /**
+   * Generate and download the DOCX file.
+   */
   private function downloadDOCX() {
     $file_name = $this->pdf_name . ".docx";
     $phpWord = new \PhpOffice\PhpWord\PhpWord();
@@ -86,6 +107,11 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $this->attachAndRedirect($tempFile, $file_name, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
   }
 
+  /**
+   * Add contact details to the DOCX file.
+   *
+   * @param \PhpOffice\PhpWord\Element\Section $section
+   */
   private function addContactsToDOCX($section) {
     $table = $section->addTable();
     $cellIndex = 0;
@@ -104,6 +130,12 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     }
   }
 
+  /**
+   * Add individual contact details to a table cell.
+   *
+   * @param \PhpOffice\PhpWord\Element\Cell $cell
+   * @param array $contact
+   */
   private function addContactDetailsToCell($cell, $contact) {
     if ($contact['contact_type'] == 'Organization') {
       $cell->addText("Organization Name: " . ($contact['organization_name'] ?? 'N/A'));
@@ -119,6 +151,14 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $cell->addText("Mobile Number: " . ($contact['phone'] ?? 'N/A'));
   }
 
+  /**
+   * Save the temporary file in the specified format.
+   *
+   * @param \PhpOffice\PhpWord\PhpWord $phpWord
+   * @param string $format
+   * @param string $file_name
+   * @return string Path to the temporary file
+   */
   private function saveTempFile($phpWord, $format, $file_name) {
     $tempFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $file_name;
     $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, $format);
@@ -126,6 +166,13 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     return $tempFile;
   }
 
+  /**
+   * Attach the temporary file to an activity and redirect the user to download it.
+   *
+   * @param string $tempFile
+   * @param string $file_name
+   * @param string $mime_type
+   */
   private function attachAndRedirect($tempFile, $file_name, $mime_type) {
     $logged_contact_id = CRM_Core_Session::getLoggedInContactID();
     $activity_type = CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_Activity', 'activity_type_id', 'Print PDF Letter');
@@ -147,6 +194,11 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     unlink($tempFile);
   }
 
+  /**
+   * Redirect to download the attached file or handle errors.
+   *
+   * @param array $attachment
+   */
   private function redirectAttachment($attachment) {
     if (!empty($attachment['id'])) {
       CRM_Utils_System::redirect($attachment['values'][0]['url']);
@@ -157,6 +209,9 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     }
   }
 
+  /**
+   * Generate and download the PDF file.
+   */
   private function downloadPDF() {
     $file_name = $this->pdf_name . ".pdf";
     $pdf_contents = CRM_Utils_PDF_Utils::html2pdf($this->html, $file_name, true);
@@ -164,6 +219,13 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $this->attachAndRedirect($tempFile, $file_name, 'application/pdf');
   }
 
+  /**
+   * Save the temporary PDF file.
+   *
+   * @param string $file_name
+   * @param string $pdf_contents
+   * @return string Path to the temporary PDF file
+   */
   private function saveTempPDF($file_name, $pdf_contents) {
     $tempFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $file_name;
     file_put_contents($tempFile, $pdf_contents);
