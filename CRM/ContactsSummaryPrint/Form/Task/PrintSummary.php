@@ -40,7 +40,10 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $msg_tpl = civicrm_api3('MessageTemplate', 'getsingle', ['msg_title' => TPL_TITLE]);
     $send_tpl_params = [
       'messageTemplateID' => (int) $msg_tpl['id'],
-      'tplParams' => ['contacts' => $this->all_contacts],
+      'tplParams' => [
+        'contacts' => $this->all_contacts,
+        'style' => 'page-break-before: auto'
+      ],
       'tokenContext' => ['smarty' => TRUE],
       'PDFFilename' => $this->pdf_name,
     ];
@@ -210,11 +213,20 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
   }
 
   /**
-   * Generate and download the PDF file.
+   * Generate and download the PDF file with custom margins.
    */
   private function downloadPDF() {
     $file_name = $this->pdf_name . ".pdf";
-    $pdf_contents = CRM_Utils_PDF_Utils::html2pdf($this->html, $file_name, true);
+
+    // Define the custom margins in CSS
+    $html_with_margins = '<style>
+      @page {
+        margin: 1cm 2cm;
+      }
+    </style>' . $this->html;
+
+    // Generate the PDF content with the specified margins
+    $pdf_contents = CRM_Utils_PDF_Utils::html2pdf($html_with_margins, $file_name, true);
     $tempFile = $this->saveTempPDF($file_name, $pdf_contents);
     $this->attachAndRedirect($tempFile, $file_name, 'application/pdf');
   }
