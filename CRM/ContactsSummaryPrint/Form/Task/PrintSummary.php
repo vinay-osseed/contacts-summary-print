@@ -134,51 +134,53 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
    */
   private function addContactsToDOCX($section) {
     foreach ($this->all_contacts as $contact) {
-        $this->addContactDetailsToTable($section, $contact);
+      $this->addContactDetailsToTable($section, $contact);
     }
   }
 
   /**
-  * Add individual contact details to a table row.
-  *
-  * @param \PhpOffice\PhpWord\Element\Section $section
-  * @param array $contact
-  */
+   * Add individual contact details to a table row.
+   *
+   * @param \PhpOffice\PhpWord\Element\Section $section
+   * @param array $contact
+   */
   private function addContactDetailsToTable($section, $contact) {
     $table = $section->addTable();
 
-    // Add contact details row
+    // Add contact details row.
     $table->addRow();
-    $cell = $table->addCell(8000); // Full width cell
+    // Full width cell.
+    $cell = $table->addCell(8000);
 
     $cell->addText("To,");
     if ($contact['contact_type'] == 'Individual') {
-        $name = ($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? '');
-        $cell->addText(trim($name) ?: 'N/A');
-    } elseif ($contact['contact_type'] == 'Organization') {
-        $cell->addText($contact['organization_name'] ?? 'N/A');
+      $name = ($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? '');
+      $cell->addText(trim($name) ?: 'N/A');
+    }
+    elseif ($contact['contact_type'] == 'Organization') {
+      $cell->addText($contact['organization_name'] ?? 'N/A');
     }
     if (!empty($contact['job_title'])) {
-        $cell->addText($contact['job_title']);
+      $cell->addText($contact['job_title']);
     }
     if (!empty($contact['supplemental_address_1'])) {
-        $cell->addText($contact['supplemental_address_1']);
+      $cell->addText($contact['supplemental_address_1']);
     }
     if (!empty($contact['supplemental_address_2'])) {
-        $cell->addText($contact['supplemental_address_2']);
+      $cell->addText($contact['supplemental_address_2']);
     }
     $cityState = ($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province']) ? ', ' : '') . ($contact['state_province'] ?? '');
     if (!empty($cityState)) {
-        $cell->addText($cityState);
+      $cell->addText($cityState);
     }
     if (!empty($contact['postal_code'])) {
-        $cell->addText($contact['postal_code']);
+      $cell->addText($contact['postal_code']);
     }
     if (!empty($contact['phone'])) {
-        $cell->addText("Ph - " . $contact['phone']);
+      $cell->addText("Ph - " . $contact['phone']);
     }
 
-    // Add an empty row to create a gap between contacts
+    // Add an empty row to create a gap between contacts.
     $section->addTextBreak();
     $table->addRow();
     $table->addCell(8000, ['valign' => 'center'])->addText('');
