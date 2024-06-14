@@ -243,6 +243,9 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
       @page {
         margin: 1cm 2cm;
       }
+      .row-gap {
+        padding: 1cm 0 0 0;
+      }
     </style>' . $this->html;
 
     // Generate the PDF content with the specified margins.
