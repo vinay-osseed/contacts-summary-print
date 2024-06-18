@@ -153,30 +153,32 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $cell = $table->addCell(8000);
 
     $cell->addText("To,");
+
     if ($contact['contact_type'] == 'Individual') {
-      $name = htmlspecialchars(($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? ''));
-      $cell->addText(trim($name) ?: 'N/A');
+      $name = htmlspecialchars(trim(($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? '')));
+      $cell->addText($name ?: 'N/A');
     }
     elseif ($contact['contact_type'] == 'Organization') {
       $organizationName = htmlspecialchars($contact['organization_name'] ?? 'N/A');
       $cell->addText($organizationName);
     }
+
     if (!empty($contact['job_title'])) {
       $cell->addText(htmlspecialchars($contact['job_title']));
     }
-    if (!empty($contact['supplemental_address_1'])) {
-      $cell->addText(htmlspecialchars($contact['supplemental_address_1']));
+
+    $addressLines = [
+      htmlspecialchars($contact['supplemental_address_1'] ?? ''),
+      htmlspecialchars($contact['supplemental_address_2'] ?? ''),
+      htmlspecialchars($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . htmlspecialchars($contact['state_province_name'] ?? '') . (!empty($contact['postal_code']) ? ' - ' . htmlspecialchars($contact['postal_code']) : ''),
+    ];
+
+    foreach ($addressLines as $line) {
+      if (!empty($line)) {
+        $cell->addText($line);
+      }
     }
-    if (!empty($contact['supplemental_address_2'])) {
-      $cell->addText(htmlspecialchars($contact['supplemental_address_2']));
-    }
-    $cityState = htmlspecialchars(($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . ($contact['state_province_name'] ?? ''));
-    if (!empty($cityState)) {
-      $cell->addText($cityState);
-    }
-    if (!empty($contact['postal_code'])) {
-      $cell->addText(htmlspecialchars($contact['postal_code']));
-    }
+
     if (!empty($contact['phone'])) {
       $cell->addText("Ph - " . htmlspecialchars($contact['phone']));
     }
