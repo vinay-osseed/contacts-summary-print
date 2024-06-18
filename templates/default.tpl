@@ -15,7 +15,7 @@
           {if $contact.supplemental_address_1}{$contact.supplemental_address_1}<br>{/if}
           {if $contact.supplemental_address_2}{$contact.supplemental_address_2}<br>{/if}
           {if $contact.city}{$contact.city}, {/if}
-          {if $contact.state_province}{$contact.state_province} - {/if}
+          {if $contact.state_province_name}{$contact.state_province_name} - {/if}
           {if $contact.postal_code}{$contact.postal_code}<br>{/if}
           {if $contact.phone}Ph - {$contact.phone}{/if}
         </td>

@@ -169,7 +169,7 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     if (!empty($contact['supplemental_address_2'])) {
       $cell->addText($contact['supplemental_address_2']);
     }
-    $cityState = ($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province']) ? ', ' : '') . ($contact['state_province'] ?? '');
+    $cityState = ($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . ($contact['state_province_name'] ?? '');
     if (!empty($cityState)) {
       $cell->addText($cityState);
     }
