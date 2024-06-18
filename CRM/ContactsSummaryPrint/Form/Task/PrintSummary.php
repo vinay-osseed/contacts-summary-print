@@ -154,30 +154,31 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
 
     $cell->addText("To,");
     if ($contact['contact_type'] == 'Individual') {
-      $name = ($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? '');
+      $name = htmlspecialchars(($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? ''));
       $cell->addText(trim($name) ?: 'N/A');
     }
     elseif ($contact['contact_type'] == 'Organization') {
-      $cell->addText($contact['organization_name'] ?? 'N/A');
+      $organizationName = htmlspecialchars($contact['organization_name'] ?? 'N/A');
+      $cell->addText($organizationName);
     }
     if (!empty($contact['job_title'])) {
-      $cell->addText($contact['job_title']);
+      $cell->addText(htmlspecialchars($contact['job_title']));
     }
     if (!empty($contact['supplemental_address_1'])) {
-      $cell->addText($contact['supplemental_address_1']);
+      $cell->addText(htmlspecialchars($contact['supplemental_address_1']));
     }
     if (!empty($contact['supplemental_address_2'])) {
-      $cell->addText($contact['supplemental_address_2']);
+      $cell->addText(htmlspecialchars($contact['supplemental_address_2']));
     }
-    $cityState = ($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . ($contact['state_province_name'] ?? '');
+    $cityState = htmlspecialchars(($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . ($contact['state_province_name'] ?? ''));
     if (!empty($cityState)) {
       $cell->addText($cityState);
     }
     if (!empty($contact['postal_code'])) {
-      $cell->addText($contact['postal_code']);
+      $cell->addText(htmlspecialchars($contact['postal_code']));
     }
     if (!empty($contact['phone'])) {
-      $cell->addText("Ph - " . $contact['phone']);
+      $cell->addText("Ph - " . htmlspecialchars($contact['phone']));
     }
 
     // Add an empty row to create a gap between contacts.
