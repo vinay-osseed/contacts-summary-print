@@ -35,3 +35,23 @@ Alternatively, you can install it via the `CiviCRM Extensions` page [here](/civi
 ## Known Issues
 
 - **DOCX Editing Limitation:** Currently, the content of `DOCX` files cannot be updated by editing the `Contacts Summary Print` custom message template, unlike PDF files.
+
+## Step to Import contacts
+
+1. Install `backup_migrate` module in drupal for backup.
+
+  ```shell
+  composer require 'drupal/backup_migrate:^5.0'
+  ```
+
+2. Enable it & take backup of DB.
+
+  ```shell
+  ./vendor/bin/drush en backup_migrate
+  ```
+
+3. Now create all tags 1st.
+
+4. Now open sheet & filter them by tags then copy(**also copy header**) it in separate sheet to export.
+
+5. Now import that exported contact with same field & contact type also assign existing tags while import.
