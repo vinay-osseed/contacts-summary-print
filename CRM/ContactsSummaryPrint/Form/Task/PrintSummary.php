@@ -38,7 +38,22 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $contacts = [];
     foreach ($this->_contactIds as $contactId) {
       try {
-        $contacts[] = civicrm_api3('Contact', 'getsingle', ['id' => $contactId]);
+        // Fetch contact data using CiviCRM API
+        $contactData = civicrm_api3('Contact', 'getsingle', ['id' => $contactId]);
+
+        // Format postal code with a space after the 3rd digit
+        if (!empty($contactData['postal_code']) && strlen($contactData['postal_code']) == 6) {
+          $formattedPostalCode = substr($contactData['postal_code'], 0, 3) . ' ' . substr($contactData['postal_code'], 3);
+          $contactData['postal_code'] = $formattedPostalCode;
+        }
+
+        // Add current employer if available
+        if (!empty($contactData['current_employer_id'])) {
+          $employerData = civicrm_api3('Contact', 'getsingle', ['id' => $contactData['current_employer_id']]);
+          $contactData['current_employer'] = $employerData['organization_name'];
+        }
+
+        $contacts[] = $contactData;
       }
       catch (CiviCRM_API3_Exception $e) {
         CRM_Core_Error::debug_log_message('API Error: ' . $e->getMessage());
@@ -152,35 +167,47 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     // Full width cell.
     $cell = $table->addCell(8000);
 
-    $cell->addText("To,");
+    $cell->addText("To");
 
     if ($contact['contact_type'] == 'Individual') {
       $name = htmlspecialchars(trim(($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? '')));
-      $cell->addText($name ?: 'N/A');
-    }
-    elseif ($contact['contact_type'] == 'Organization') {
+      if (!empty($name)) {
+        $cell->addText($name);
+      } else {
+        $cell->addText('N/A');
+      }
+    } elseif ($contact['contact_type'] == 'Organization') {
       $organizationName = htmlspecialchars($contact['organization_name'] ?? 'N/A');
       $cell->addText($organizationName);
     }
 
     if (!empty($contact['job_title'])) {
-      $cell->addText(htmlspecialchars($contact['job_title']));
+      $cell->addText(htmlspecialchars($contact['job_title']) . ',');
     }
 
+    if ($contact['contact_type'] == 'Individual') {
+      if (!empty($contact['current_employer'])) {
+        $cell->addText(htmlspecialchars($contact['current_employer']) . ',');
+      }
+    }
     $addressLines = [
       htmlspecialchars($contact['supplemental_address_1'] ?? ''),
       htmlspecialchars($contact['supplemental_address_2'] ?? ''),
-      htmlspecialchars($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . htmlspecialchars($contact['state_province_name'] ?? '') . (!empty($contact['postal_code']) ? ' - ' . htmlspecialchars($contact['postal_code']) : ''),
+      trim(htmlspecialchars($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . htmlspecialchars($contact['state_province_name'] ?? '') . (!empty($contact['postal_code']) ? ' - ' . htmlspecialchars($contact['postal_code']) : ''))
     ];
 
     foreach ($addressLines as $line) {
-      if (!empty($line)) {
-        $cell->addText($line);
+      if (!empty($line) && $line !== ',') {
+        $cell->addText($line . ',');
       }
     }
 
     if (!empty($contact['phone'])) {
-      $cell->addText("Ph - " . htmlspecialchars($contact['phone']));
+      if ($contact['phone_type'] == 'Mobile') {
+        $cell->addText("Mobile: " . htmlspecialchars($contact['phone']));
+      } else {
+        $cell->addText("Phone: " . htmlspecialchars($contact['phone']));
+      }
     }
 
     // Add an empty row to create a gap between contacts.
