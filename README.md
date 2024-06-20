@@ -36,22 +36,37 @@ Alternatively, you can install it via the `CiviCRM Extensions` page [here](/civi
 
 - **DOCX Editing Limitation:** Currently, the content of `DOCX` files cannot be updated by editing the `Contacts Summary Print` custom message template, unlike PDF files.
 
-## Step to Import contacts
+## Step to Install/Configure extension & Import contacts
 
-1. Install `backup_migrate` module in drupal for backup.
+1. Get the latest extesion code under the `web/sites/default/files/civicrm/ext` directory.
 
-  ```shell
-  composer require 'drupal/backup_migrate:^5.0'
-  ```
-
-2. Enable it & take backup of DB.
+- Get extension code with :
 
   ```shell
-  ./vendor/bin/drush en backup_migrate
+  git clone --branch v1.1.1 --single-branch https://github.com/vinay-osseed/contacts-summary-print.git
   ```
 
-3. Now create all tags 1st.
+- Install it with :
 
-4. Now open sheet & filter them by tags then copy(**also copy header**) it in separate sheet to export.
+  ```shell
+  ./vendor/bin/cv ext:install contacts-summary-print
+  ```
 
-5. Now import that exported contact with same field & contact type also assign existing tags while import.
+- Uninstall it with:
+
+  ```shell
+  ./vendor/bin/cv ext:ext:uninstall contacts-summary-print
+  ```
+
+2. Go to `Settings - Upload Directories` path `/civicrm/admin/setting/path` & set `Custom PHP Directory` value to :
+
+- Copy this :
+  ```text
+  [civicrm.files]/ext/contacts-summary-print/CRM
+  ```
+
+4. Now create all tags first.
+
+5. Now open sheet & filter them by tags then copy(**also copy header**) it in separate sheet to export as CSV.
+
+6. Now import that exported contact with same field & contact type also assign existing tags while import.

@@ -27,6 +27,7 @@ function contacts_summary_print_civicrm_config(&$config): void {
 function contacts_summary_print_civicrm_install(): void {
   _contacts_summary_print_civix_civicrm_install();
   contacts_summary_print_add_message_template();
+  contacts_summary_print_modify_address_phone_schema();
 }
 
 /**
@@ -36,6 +37,7 @@ function contacts_summary_print_civicrm_install(): void {
  */
 function contacts_summary_print_civicrm_enable(): void {
   _contacts_summary_print_civix_civicrm_enable();
+  contacts_summary_print_modify_address_phone_schema();
 }
 
 /**
@@ -93,6 +95,19 @@ function contacts_summary_print_add_message_template() {
 }
 
 /**
+ * Modify the address schema to change the length of certain fields.
+ */
+function contacts_summary_print_modify_address_phone_schema() {
+  // Modify the address table to increase the size of the address fields
+  CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_address MODIFY street_address VARCHAR(255)");
+  CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_address MODIFY supplemental_address_1 VARCHAR(255)");
+  CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_address MODIFY supplemental_address_2 VARCHAR(255)");
+  CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_address MODIFY supplemental_address_3 VARCHAR(255)");
+  CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_phone MODIFY phone VARCHAR(50)");
+  CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_phone MODIFY phone_numeric VARCHAR(50)");
+}
+
+/**
  * Implements hook_civicrm_uninstall().
  *
  * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_uninstall
@@ -113,7 +128,14 @@ function contacts_summary_print_civicrm_uninstall(): void {
     }
   }
   catch (CiviCRM_API3_Exception $e) {
-    // Handle the error, possibly log it.
     CRM_Core_Error::debug_log_message('API Error: ' . $e->getMessage());
   }
+
+  // Revert the address & phone table changes, if fields are empty/deleted.
+  // CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_address MODIFY street_address VARCHAR(96)");
+  // CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_address MODIFY supplemental_address_1 VARCHAR(96)");
+  // CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_address MODIFY supplemental_address_2 VARCHAR(96)");
+  // CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_address MODIFY supplemental_address_3 VARCHAR(96)");
+  // CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_phone MODIFY phone VARCHAR(32)");
+  // CRM_Core_DAO::executeQuery("ALTER TABLE civicrm_phone MODIFY phone_numeric VARCHAR(32)");
 }
