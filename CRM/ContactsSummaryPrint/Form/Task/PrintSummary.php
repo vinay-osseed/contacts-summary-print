@@ -38,16 +38,16 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $contacts = [];
     foreach ($this->_contactIds as $contactId) {
       try {
-        // Fetch contact data using CiviCRM API
+        // Fetch contact data using CiviCRM API.
         $contactData = civicrm_api3('Contact', 'getsingle', ['id' => $contactId]);
 
-        // Format postal code with a space after the 3rd digit
+        // Format postal code with a space after the 3rd digit.
         if (!empty($contactData['postal_code']) && strlen($contactData['postal_code']) == 6) {
           $formattedPostalCode = substr($contactData['postal_code'], 0, 3) . ' ' . substr($contactData['postal_code'], 3);
           $contactData['postal_code'] = $formattedPostalCode;
         }
 
-        // Add current employer if available
+        // Add current employer if available.
         if (!empty($contactData['current_employer_id'])) {
           $employerData = civicrm_api3('Contact', 'getsingle', ['id' => $contactData['current_employer_id']]);
           $contactData['current_employer'] = $employerData['organization_name'];
@@ -170,42 +170,55 @@ class CRM_ContactsSummaryPrint_Form_Task_PrintSummary extends CRM_Contact_Form_T
     $cell->addText("To");
 
     if ($contact['contact_type'] == 'Individual') {
-      $name = htmlspecialchars(trim(($contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? '')));
+      $name = trim((@$contact['prefix'] ?? '') . ' ' . ($contact['first_name'] ?? '') . ' ' . ($contact['last_name'] ?? ''));
       if (!empty($name)) {
-        $cell->addText($name);
-      } else {
-        $cell->addText('N/A');
+        $cell->addText(htmlspecialchars($name) . ',');
       }
-    } elseif ($contact['contact_type'] == 'Organization') {
+    }
+    elseif ($contact['contact_type'] == 'Organization') {
       $organizationName = htmlspecialchars($contact['organization_name'] ?? 'N/A');
-      $cell->addText($organizationName);
+      $cell->addText($organizationName . ',');
     }
 
     if (!empty($contact['job_title'])) {
       $cell->addText(htmlspecialchars($contact['job_title']) . ',');
     }
 
-    if ($contact['contact_type'] == 'Individual') {
-      if (!empty($contact['current_employer'])) {
-        $cell->addText(htmlspecialchars($contact['current_employer']) . ',');
+    if ($contact['contact_type'] == 'Individual' && !empty($contact['current_employer'])) {
+      $cell->addText(htmlspecialchars($contact['current_employer']) . ',');
+    }
+
+    if (!empty($contact['supplemental_address_1'])) {
+      $cell->addText(htmlspecialchars($contact['supplemental_address_1']) . ',');
+    }
+
+    if (!empty($contact['supplemental_address_2'])) {
+      $cell->addText(htmlspecialchars($contact['supplemental_address_2']) . ',');
+    }
+
+    // Check for New Delhi and Delhi condition.
+    if (isset($contact['city'], $contact['state_province_name']) && $contact['city'] === 'New Delhi' && $contact['state_province_name'] === 'Delhi') {
+      $cell->addText(htmlspecialchars($contact['city']) . ',');
+    }
+    else {
+      if (!empty($contact['city']) && !empty($contact['state_province_name'])) {
+        $cell->addText(htmlspecialchars(trim(htmlspecialchars($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . htmlspecialchars($contact['state_province_name'] ?? '')) . ','));
       }
     }
-    $addressLines = [
-      htmlspecialchars($contact['supplemental_address_1'] ?? ''),
-      htmlspecialchars($contact['supplemental_address_2'] ?? ''),
-      trim(htmlspecialchars($contact['city'] ?? '') . (!empty($contact['city']) && !empty($contact['state_province_name']) ? ', ' : '') . htmlspecialchars($contact['state_province_name'] ?? '') . (!empty($contact['postal_code']) ? ' - ' . htmlspecialchars($contact['postal_code']) : ''))
-    ];
 
-    foreach ($addressLines as $line) {
-      if (!empty($line) && $line !== ',') {
-        $cell->addText($line . ',');
-      }
+    if (!empty($contact['postal_code'])) {
+      $cell->addText('Pincode: ' . htmlspecialchars($contact['postal_code']) . '.');
     }
 
     if (!empty($contact['phone'])) {
-      if ($contact['phone_type'] == 'Mobile') {
+      // For Mobile type.
+      if (@$contact['phone_type_id'] == 2) {
         $cell->addText("Mobile: " . htmlspecialchars($contact['phone']));
-      } else {
+      }
+      elseif (@$contact['phone_type_id'] == 1) {
+        $cell->addText("Phone: " . htmlspecialchars($contact['phone']));
+      }
+      else {
         $cell->addText("Phone: " . htmlspecialchars($contact['phone']));
       }
     }
